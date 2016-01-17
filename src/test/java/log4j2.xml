@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+
+	<Properties>
+		<Property name="filename">target/log.txt</Property>
+	</Properties>
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%style{%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] }{white} %highlight{%-5p %c{36}-%F-%M-%L行:%msg }{FATAL=red, ERROR=red, WARN=yellow, INFO=white,
+DEBUG=green, TRACE=blue} %style{%rThrowable{full} %n}{red}"
+				charset="utf-8" />
+		</Console>
+		<File name="File" fileName="${filename}">
+			<PatternLayout
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{36}-%F-%M-%L行:%msg %rEx{full} %n" />
+		</File>
+		<RollingFile name="RollingFile" fileName="logs/exceptionLog.txt"
+			filePattern="logs/app-%d{MM-dd-yyyy}.log.gz">
+			<RegexFilter regex=".*exception.*" onMatch="ACCEPT"
+				onMismatch="DENY" />
+			<PatternLayout>
+				<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{36}-%F-%M-%L行:%msg
+					%rEx{full} %n</pattern>
+			</PatternLayout>
+			<TimeBasedTriggeringPolicy />
+		</RollingFile>
+		<!-- <SMTP name="MailException" subject="异常日志" to="xiao.yu@ustcinfo.com"
+			from="xiaoyu369135126@sina.com" smtpUsername="xiaoyu369135126@sina.com" smtpPassword="sd123kl" smtpHost="smtp.sina.com"
+			smtpPort="25" bufferSize="50">
+				<RegexFilter regex=".*exception.*" onMatch="ACCEPT"
+					onMismatch="DENY" />
+		</SMTP>
+		<SMTP name="MailError" subject="错误日志" to="xiao.yu@ustcinfo.com"
+			from="xiaoyu369135126@sina.com" smtpUsername="xiaoyu369135126@sina.com" smtpPassword="sd123kl" smtpHost="smtp.sina.com"
+			smtpPort="25" bufferSize="50">
+		</SMTP> -->
+	</Appenders>
+	<Loggers>
+		<Root level="trace">
+			<AppenderRef ref="Console" level="info"/>
+			<AppenderRef ref="RollingFile" />
+		<!-- 	<AppenderRef ref="MailException" />
+			<AppenderRef ref="MailError" level="error"/> -->
+			<AppenderRef ref="File"/>
+		</Root>
+		
+	</Loggers>
+</Configuration>

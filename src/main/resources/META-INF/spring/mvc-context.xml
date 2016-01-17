@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<!-- JSON数据转换 -->
+	<bean id="mappingJacksonHttpMessageConverter"
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<!-- 默认取第一个做为输出的contentType -->
+			<list>
+				<value>application/json;charset=UTF-8</value>
+				<value>text/json;charset=UTF-8</value>
+			</list>
+		</property>
+		<property name="objectMapper">
+			<bean class="com.fasterxml.jackson.databind.ObjectMapper">
+				<!-- 改变其默认时间解析模版 -->
+				<property name="dateFormat">
+					<bean class="java.text.SimpleDateFormat">
+						<constructor-arg index="0" value="yyyy-MM-dd HH:mm:ss" />
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	<!-- String数据转换 -->
+	<bean id="stringConverter"
+		class="org.springframework.http.converter.StringHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<!-- 默认为iso8859-1及*/*，这里强制覆盖掉 ，防止乱码 -->
+			<list>
+				<value>text/plain;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+	<!-- HandlerMapping 映射处理器 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" />
+
+	<!-- 处理方法级别上的@RequestMapping注解 处理器适配器 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="messageConverters">
+			<!-- 这里注意下顺序，json转换器同样能处理(string,text/plain)这样的类型，故将string转换器放在最前 -->
+			<!-- @ResponceBody会按顺序遍历如下转换器按返回类型及能接受的mimeType来选择合适的转换器 -->
+			<list>
+				<!-- 支持 (string,text/plain)-->
+				<ref bean="stringConverter" />
+				<!-- 支持(map,application/json;charset=UTF-8) -->
+				<ref bean="mappingJacksonHttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 静态资源不拦截 -->
+	<mvc:resources location="/resources/" mapping="/resources/**"
+		cache-period="3600" />
+
+	<!-- ViewResolver 视图解析器 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+	
+	<!-- view name与相应的视图解析器绑定于views.properties -->
+	<bean class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+		<property name="basename" value="views" />
+		<!-- 优先级最高 -->
+		<property name="order" value="0" />
+	</bean>	
+	
+		<!-- 文件上传处理器 -->
+	<bean id="multipartResolver"
+		class="com.cmcc.zysoft.spring_mvc.util.CustomMultipartResolver" />
+		
+		
+</beans>

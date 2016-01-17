@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<!-- 引入 jQuery -->
+<script src="scripts/jquery-1.11.1.js" type="text/javascript"></script>
+<!-- <script type="text/javascript">
+function show(data) {
+    data = $.parseJSON(data);
+	alert(data.msg);
+}
+</script>
+<script src="http://localhost:8080/mobile/systemUser/jsnp.htm?jsoncallback=show" type="text/javascript"></script> -->
+<script type="text/javascript">
+//等待dom元素加载完毕.
+$(document).ready(function(){
+	//$.getJSON("http://api.k780.com:88/?app=idcard.get&idcard=110101199001011118&appkey=10003&sign=b59bc3ef6191eb9f747dd4e83c99f2a4&format=json",function(data) {
+	//	alert(data);
+	//});
+	//var result.info = 'dd';
+	/*
+	 $.ajax({
+             url:'http://192.168.215.43:8184/simple/jsnp.htm',
+			 data : {echo:"你，好！"},
+             dataType:"jsonp",
+             jsonp:"jsoncallback",
+             success:function(data){
+				result.info = data.msg;
+				alert(result);
+             },
+			 error:function(){
+				alert("error");
+			 }
+     });*/
+	   // alert('dd'+result);
+		$.getJSON("http://192.168.215.43:8184/simple/jsnp2.htm?echo=23&jsoncallback=?",function(data) {
+			console.log(data.msg);
+		}).done(function() {
+			console.log( "second success" );
+		}).fail(function() {
+			console.log( "error" );
+		}).always(function() {
+			console.log( "complete" );
+		});
+ 
+});
+</script>
+</head>
+<body>
+jsonp
+</body>
+</html>

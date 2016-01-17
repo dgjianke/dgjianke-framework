@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	   		http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/security 
+			http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<!-- Spring-Security 的配置 -->
+	<!-- 注意开启use-expressions.表示开启表达式. see:http://www.family168.com/tutorial/springsecurity3/html/el-access.html -->
+	<security:http pattern="/resources/**" security="none" />
+	
+	<security:http pattern="/pc/**" security="none" />
+
+	<security:http use-expressions="true">
+		
+		<security:form-login login-page="/auth/login"
+			authentication-failure-url="/auth/login?error=true"
+			default-target-url="/main/common" />
+
+		<security:logout invalidate-session="true"
+			logout-success-url="/auth/login" logout-url="/auth/logout" />
+
+		<security:session-management
+			invalid-session-url="/">
+			<security:concurrency-control
+				max-sessions="1" />
+		</security:session-management>
+		
+		<!-- <security:custom-filter ref="anonymousAuthFilter" after="ANONYMOUS_FILTER"/> -->
+		<!-- 这里必须before，否则前一个直接放行了 -->
+		<security:custom-filter ref="filterSecurityInterceptor"  before="FILTER_SECURITY_INTERCEPTOR"/>
+	</security:http>
+
+	<!-- 指定一个自定义的authentication-manager :customUserDetailsService -->
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider
+			user-service-ref="customUserDetailsService">
+			<security:password-encoder ref="passwordEncoder" />
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+	<!-- 对密码进行MD5编码 -->
+	<bean
+		class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"
+		id="passwordEncoder" />
+
+	<!-- 通过 customUserDetailsService,Spring会自动的用户的访问级别. 也可以理解成:以后我们和数据库操作就是通过customUserDetailsService来进行关联. -->
+	<bean id="customUserDetailsService"
+		class="com.cmcc.zysoft.spring_mvc.security.CustomUserDetailsService" />
+
+	<!-- 国际化资源 -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename"
+			value="classpath:org/springframework/security/messages_zh_CN" />
+	</bean>
+	
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+		<constructor-arg index="0">
+			<list>
+				<bean class="org.springframework.security.access.vote.RoleVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<!-- 静态工厂方法 返回所有的url-role配置-->
+ 	<bean id="data" class="com.cmcc.zysoft.spring_mvc.security.ResourceRole" factory-method="generate" />
+	
+ 	<bean id="securityMetadataSource" class="org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource">
+ 		<constructor-arg index="0" ref="data" />
+ 	</bean>
+	
+	<!-- 自定义url-role拦截器 -->
+	<bean id="filterSecurityInterceptor"
+		class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="accessDecisionManager" />
+		<property name="securityMetadataSource" ref="securityMetadataSource" />
+	</bean>
+</beans>
+
